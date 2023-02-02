@@ -4,7 +4,7 @@ const {uploadImage} = require('../middlewares/awsConection')
 const {isValidString, isValidObjectId} = require('../Validations/validation');
 
 
-exports.createProduct = async (req, res) => {
+const createProduct = async (req, res) => {
     try {
         let data = req.body
         let files = req.files
@@ -88,7 +88,67 @@ exports.createProduct = async (req, res) => {
     }
 }
 
-exports.updateProduct = async(req, res) => {
+const getProduct = async (req, res) => {
+    let filter = { isDeleted: false };
+    let priceSorting = {};
+
+    if (req.query.size) filter.availableSizes = req.query.size;
+
+    if (req.query.name) filter.title = req.query.name;
+
+    if (req.query.priceGreaterThan && req.query.priceLessThan) {
+    filter.price = {
+            $gt: req.query.priceGreaterThan,
+            $lt: req.query.priceLessThan
+        }
+
+    } else if (req.query.priceGreaterThan || req.query.priceLessThan) {
+        if (req.query.priceGreaterThan) {
+            filter.price = { $gt: req.query.priceGreaterThan }
+        }
+        if (req.query.priceLessThan) {
+        filter.price = { $lt: req.query.priceLessThan }
+        }
+    }
+    let priceSort = parseInt(req.query.priceSort)
+    if(priceSort){
+        console.log(typeof(priceSort));
+        if(priceSort != -1&&priceSort != 1) return res.status(400).send({status:false,message:"priceSort should be only 1 or -1"})
+        priceSorting = {price:priceSort};}
+
+const product = await productModel
+        .find(filter)
+        .sort(priceSorting)
+        .select({ createdAt: 0, updatedAt: 0, deletedAt: 0, __v: 0 });
+    
+
+     if (!product) {
+        return res.status(404).json({
+            status: false,
+            message: "No product product found with that query",
+        });
+    }
+    res.status(200).json({ status: true, data: product });
+};
+
+const getProductById = async(req, res) => {
+
+    try {
+        const productId = req.params.productId
+        if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "ProductId not valid" })
+        
+
+        let productData = await productModel.findOne({ _id: productId, isDeleted: false })
+        if (!productData) return res.status(404).send({ status: false, message: "Product not exist" })
+        
+        return res.status(200).send({ status: true, message: "Successfull", data: productData })
+    } catch (err) {
+        return res.status(500).send({ satus: false, err: err.message })
+    }
+
+}
+
+const updateProduct = async(req, res) => {
 
     let productId = req.params.productId
 
@@ -178,24 +238,7 @@ exports.updateProduct = async(req, res) => {
 
 
 
-exports.getProductById = async(req, res) => {
-
-    try {
-        const productId = req.params.productId
-        if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "ProductId not valid" })
-        
-
-        let productData = await productModel.findOne({ _id: productId, isDeleted: false })
-        if (!productData) return res.status(404).send({ status: false, message: "Product not exist" })
-        
-        return res.status(200).send({ status: true, message: "Successfull", data: productData })
-    } catch (err) {
-        return res.status(500).send({ satus: false, err: err.message })
-    }
-
-}
-
-exports.deleteProduct = async(req, res) => {
+const deleteProduct = async(req, res) => {
 
     try {
 
@@ -215,3 +258,5 @@ exports.deleteProduct = async(req, res) => {
     }
 
 }
+
+module.exports = {createProduct,getProduct,updateProduct,getProductById,deleteProduct}

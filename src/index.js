@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const route = require('./routes/route')
 const multer=require("multer")
 const app = express()
+mongoose.set({strictQuery:true})
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
