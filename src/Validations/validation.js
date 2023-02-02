@@ -19,7 +19,7 @@ const isValidpassword = (value) => { return (/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-
 
 const isValidMobileNumber = (value) => { return ((/^((\+91)?|91)?[6789][0-9]{9}$/g).test(value)); }
 
-const isValidCity = (value) => { return (/^[A-za-z]+$/).test(value) }
+const isValidCity = (value) => { return ((/^[A-Z a-z]+$/).test(value)) }
 
 const isValidPin = (value) => { return (/^[1-9][0-9]{5}$/).test(value) }
 

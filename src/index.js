@@ -5,6 +5,7 @@ const multer=require("multer")
 const app = express()
 
 app.use(express.json())
+app.use(express.urlencoded({extended:true}))
 app.use(multer().any())
 
 mongoose.connect("mongodb+srv://abhinav:abhi123@cluster0.qicwtqo.mongodb.net/group4Database",
