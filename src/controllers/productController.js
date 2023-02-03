@@ -4,6 +4,7 @@ const { uploadImage } = require('../middlewares/awsConection')
 const { isValidObjectId, isValidString, isValidName, isValidProductName, isValidPrice, isValidImage } = require('../Validations/validation');
 
 
+//___________________________________________Product Creation_______________________________________________________________
 const createProduct = async (req, res) => {
     try {
         let data = req.body
@@ -88,6 +89,7 @@ const createProduct = async (req, res) => {
     }
 }
 
+//___________________________________________Fetching Product_______________________________________________________________
 const getProduct = async (req, res) => {
     try {
         let filter = { isDeleted: false };
@@ -146,6 +148,7 @@ const getProduct = async (req, res) => {
     }
 };
 
+//___________________________________________Fetching Product By Id_______________________________________________________________
 const getProductById = async (req, res) => {
 
     try {
@@ -163,6 +166,7 @@ const getProductById = async (req, res) => {
 
 }
 
+//___________________________________________Product Updation_______________________________________________________________
 const updateProduct = async (req, res) => {
 
     let productId = req.params.productId
@@ -251,8 +255,7 @@ const updateProduct = async (req, res) => {
     return res.status(200).send({ status: true, message: "Successfully Updated", data: updatedproduct })
 }
 
-
-
+//___________________________________________Product Deletion_______________________________________________________________
 const deleteProduct = async (req, res) => {
 
     try {
