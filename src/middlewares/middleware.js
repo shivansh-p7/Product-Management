@@ -13,7 +13,7 @@ const Authentication = async (req, res, next) => {
                 return res.status(400).send({ status: false, message: err.message })
             }
             if (decodedToken) {
-                req.decodedToken = decodedToken
+                req.decodedToken = decodedToken.userId
                 next();
             }
         });

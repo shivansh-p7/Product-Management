@@ -11,12 +11,14 @@ router.post('/login', userLogin);
 router.get('/user/:userId/profile',Authentication, getUser);
 router.put('/user/:userId/profile',Authentication, updateUser);
 
+
 //......................................PRODUCT API's...............................
 router.post('/products', createProduct);
 router.get('/products', getProduct);
 router.get('/products/:productId', getProductById);
 router.put('/products/:productId', updateProduct);
 router.delete('/products/:productId', deleteProduct);
+
 
 //......................................CART API's...............................
 router.post("/users/:userId/cart",Authentication, createCart);
