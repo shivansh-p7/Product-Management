@@ -18,13 +18,11 @@ const productSchema = new mongoose.Schema({
     },
     currencyId: {
         type: String,
-        required: true,
         enum: "INR"
       
     },
     currencyFormat: {
         type: String,
-        required: true,
         enum: "₹"
        
     },

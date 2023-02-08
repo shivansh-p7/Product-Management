@@ -28,18 +28,15 @@ const createProduct = async (req, res) => {
         if (!isValidPrice(price)) return res.status(400).send({ status: false, message: "invalid price" });
         info.price = Number(price).toFixed(2)
 
-   
+        if (currencyId) {
         if (!isValidString(currencyId)) return res.status(400).send({ status: false, message: "currencyId is mandatory" });
-        if(currencyId!="INR") return res.status(400).send({status:false,message:"currencyId  should be INR"})
+        if(currencyId!="INR") return res.status(400).send({status:false,message:"currencyId  should be INR"});
+        }
 
-        // if (currencyFormat) {
-        //     if (!isValidString(currencyFormat)) return res.status(400).send({ status: false, message: "currencyFormat is mandatory" });
-        //     info.currencyFormat = currencyFormat
-        // } else {
-        //     info.currencyFormat = '₹'
-        // }
-        if (!isValidString(currencyFormat)) return res.status(400).send({ status: false, message: "currencyFormat is mandatory" });
-        if(currencyFormat!="₹") return res.status(400).send({status:false,message:"currencyFormat should ₹"})
+        if (currencyFormat) {
+            if (!isValidString(currencyFormat)) return res.status(400).send({ status: false, message: "currencyFormat is mandatory" });
+            if(currencyFormat!="₹") return res.status(400).send({status:false,message:"currencyFormat should ₹"}) 
+        }
 
         if (isFreeShipping) {
             if (!isValidString(isFreeShipping)) return res.status(400).send({ status: false, message: "provide value of Free Shipping!" });
@@ -94,18 +91,21 @@ const getProduct = async (req, res) => {
         let filter = { isDeleted: false };
         let priceSorting = {};
 
+        let {name,price,priceGreaterThan,priceLessThan,size,...a} = req.query;
+        if(Object.keys(a).length!=0) return res.status(400).send({status:false,message:"only name price or size can be used for filter"})
+
         if (req.query.size) {
             availableSizes = (req.query.size).split(',').map((size) => size.trim().toUpperCase())
             for (let i = 0; i < availableSizes.length; i++) {
                 if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i])) return res.status(400).send({ status: false, message: "size can contain only S, XS,M, X, L, XXL, XL" });
             }
-            filter.availableSizes = availableSizes;
+            filter.availableSizes = availableSizes.join(',');
         }
 
         if (req.query.name) {
             if (!isValidString(req.query.name)) { return res.status(400).send({ status: false, message: "title is mandatory" }) }
             if (!isValidProductName(req.query.name)) { return res.status(400).send({ status: false, message: "invalid Title" }) }
-            filter.title = req.query.name;
+            filter.title = {$regex:req.query.name};
         }
 
         if (req.query.priceGreaterThan && req.query.priceLessThan) {
@@ -169,8 +169,10 @@ const updateProduct = async (req, res) => {
     let productData = await productModel.findOne({ _id: productId, isDeleted: false })
     if (!productData) return res.status(404).send({ status: false, message: "No Product Found" })
 
-    let { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments } = req.body
+    let { title, description, price, isFreeShipping, productImage, style, availableSizes, installments,...a } = req.body
     if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: "Please enter some data" })
+
+    if(Object.keys(a).length!=0) return res.status(400).send({status:false,message:`${Object.keys(a)} cannot be updated`})
 
     let final = {}
 
@@ -194,22 +196,6 @@ const updateProduct = async (req, res) => {
         final.price = price
     }
 
-    if (currencyId) {
-        if (!isValidString(currencyId)) return res.status(400).send({ status: false, message: "CurrencyId invalid format." })
-        currencyId = currencyId.toUpperCase()
-        if (currencyId !== "INR") return res.status(400).send({ status: false, message: "please enter the correct currencyId " })
-
-        final.currencyId = currencyId
-    }
-
-    if (currencyFormat) {
-        if (!isValidString(currencyFormat)) return res.status(400).send({ status: false, message: "Currency Invalid format." })
-        if (currencyFormat !== "₹") return res.status(400).send({ status: false, message: "Please enter the correct currency" })
-
-        final.currencyFormat = currencyFormat
-    }
-
-
     if (style) {
         if (!isValidString(style)) return res.status(400).send({ status: false, message: "Invalid style details" });
         final.style = style
@@ -217,12 +203,13 @@ const updateProduct = async (req, res) => {
 
     if (availableSizes) {
         if (!isValidString(availableSizes)) return res.status(400).send({ status: false, message: "Size is mandatory" });
-        availableSizes = availableSizes.split(',').map((size) => size.trim())
+        availableSizes = availableSizes.split(',').map((size) => size.trim().toUpperCase())
         for (let i = 0; i < availableSizes.length; i++) {
             if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i])) return res.status(400).send({ status: false, message: "size can contain only S, XS,M, X, L, XXL, XL" });
         }
         final.availablesizes = availableSizes
     }
+    
 
     if (isFreeShipping) {
         isFreeShipping = isFreeShipping.trim().toLowerCase()
