@@ -48,9 +48,9 @@ const createOrder = async (req, res) => {
         let createdOrder = await orderModel.create(info)
         let { __v, ...orderData } = createdOrder._doc
 
-        //await cartModel.findOneAndUpdate({ userId: userId, _id: cartId }, { items: [], totalPrice: 0, totalItems: 0 })
+        await cartModel.findOneAndUpdate({ userId: userId, _id: cartId }, { items: [], totalPrice: 0, totalItems: 0 })
 
-        res.status(201).send({ status: true, message: "order generated successfully", data: orderData })
+       return res.status(201).send({ status: true, message: "order generated successfully", data: orderData })
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })

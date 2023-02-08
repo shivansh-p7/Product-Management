@@ -10,9 +10,9 @@ const createCart = async (req, res) => {
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "invalid userId" })
 
 
-        Authorization
+        //Authorization
        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "you are not authorised for this action" })
-        Authorization
+       // Authorization
 
         const { productId, quantity } = req.body;
         if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "invalid productId" })
@@ -32,7 +32,7 @@ const createCart = async (req, res) => {
         }
 
         // Check if cart exists for user
-        let cart = await cartModel.findOne({ userId });
+        let cart = await cartModel.findOne({ userId:userId });
         if (!cart) {
             // Create a new cart for the user
             cart = new cartModel({
@@ -119,15 +119,15 @@ const updateCart = async (req, res) => {
 
 
         let isProductExist = await productModel.findOne({ _id: productId, isDeleted: false })
-        if (!isProductExist) return res.status(400).send({ status: false, message: "product does not exist" })
+        if (!isProductExist) return res.status(404).send({ status: false, message: "product does not exist" })
 
         let cartDetails = await cartModel.findOne({ _id: cartId, userId: userId });
 
-        if (!cartDetails) return res.status(400).send({ status: false, message: "add products in cart first" })
+        if (!cartDetails) return res.status(404).send({ status: false, message: "add products in cart first" })
 
         let productInCart = cartDetails.items.find(product => product.productId == productId);
 
-        if (productInCart == undefined) return res.status(400).send({ status: false, message: "no Product in cart to Update" })
+        if (productInCart == undefined) return res.status(404).send({ status: false, message: "no Product in cart to Update" })
         let productIndex = cartDetails.items.findIndex(product => product.productId == productId);
 
         if (removeProduct == 1 || productInCart.quantity == 1) {

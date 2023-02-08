@@ -13,7 +13,7 @@ const createProduct = async (req, res) => {
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, ...other } = data
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please provide required data" });
-        if (Object.keys(other).length == 0) { return res.status(400).send({ status: false, message: `Please remove ${Object.keys(other)} key` }) }
+        if (Object.keys(other).length !== 0) { return res.status(400).send({ status: false, message: `Please remove ${Object.keys(other)} key` }) }
 
         let info = {}
 
@@ -26,21 +26,20 @@ const createProduct = async (req, res) => {
 
         if (!isValidString(price)) return res.status(400).send({ status: false, message: "price is mandatory" });
         if (!isValidPrice(price)) return res.status(400).send({ status: false, message: "invalid price" });
-        info.price = Number(price)
+        info.price = Number(price).toFixed(2)
 
-        if (currencyId) {
-            if (!isValidString(currencyId)) return res.status(400).send({ status: false, message: "CurrencyId is mandatory" });
-            info.currencyId = currencyId
-        } else {
-            info.currencyId = "INR"
-        }
+   
+        if (!isValidString(currencyId)) return res.status(400).send({ status: false, message: "currencyId is mandatory" });
+        if(currencyId!="INR") return res.status(400).send({status:false,message:"currencyId  should be INR"})
 
-        if (currencyFormat) {
-            if (!isValidString(currencyFormat)) return res.status(400).send({ status: false, message: "currencyFormat is mandatory" });
-            info.currencyFormat = currencyFormat
-        } else {
-            info.currencyFormat = '₹'
-        }
+        // if (currencyFormat) {
+        //     if (!isValidString(currencyFormat)) return res.status(400).send({ status: false, message: "currencyFormat is mandatory" });
+        //     info.currencyFormat = currencyFormat
+        // } else {
+        //     info.currencyFormat = '₹'
+        // }
+        if (!isValidString(currencyFormat)) return res.status(400).send({ status: false, message: "currencyFormat is mandatory" });
+        if(currencyFormat!="₹") return res.status(400).send({status:false,message:"currencyFormat should ₹"})
 
         if (isFreeShipping) {
             if (!isValidString(isFreeShipping)) return res.status(400).send({ status: false, message: "provide value of Free Shipping!" });
@@ -125,22 +124,16 @@ const getProduct = async (req, res) => {
         }
         let priceSort = parseInt(req.query.priceSort)
         if (priceSort) {
-            console.log(typeof (priceSort));
+           
             if (priceSort != -1 && priceSort != 1) return res.status(400).send({ status: false, message: "priceSort should be only 1 or -1" })
             priceSorting = { price: priceSort };
         }
 
-        const product = await productModel
-            .find(filter)
-            .sort(priceSorting)
-            .select({ createdAt: 0, updatedAt: 0, deletedAt: 0, __v: 0 });
+        const product = await productModel.find(filter).sort(priceSorting).select({ createdAt: 0, updatedAt: 0, deletedAt: 0, __v: 0 });
 
 
         if (!product) {
-            return res.status(404).json({
-                status: false,
-                message: "No product product found with that query",
-            });
+            return res.status(404).json({status: false,message: "No product product found with that query", });
         }
         res.status(200).json({ status: true, data: product });
     } catch (err) {
