@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
             pincode: { 
                 type: Number, 
                 required: true, 
-                trim: true }
+                 }
         },
         billing: {
             street: { 
@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema({
             pincode: { 
                 type: Number, 
                 required: true, 
-                trim: true }
+                 }
         }
     }
 }, { timestamps: true })

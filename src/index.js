@@ -6,8 +6,10 @@ const app = express()
 mongoose.set({strictQuery:true})
 
 app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+
 app.use(multer().any())
+
+
 
 mongoose.connect("mongodb+srv://abhinav:abhi123@cluster0.qicwtqo.mongodb.net/group4Database",
 {dbName:"group4Database"},
@@ -16,6 +18,8 @@ mongoose.connect("mongodb+srv://abhinav:abhi123@cluster0.qicwtqo.mongodb.net/gro
     .catch(err => console.log(err))
 
 app.use('/', route)
+
+
 
 
 app.listen(3000, function() {
