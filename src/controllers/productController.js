@@ -99,7 +99,7 @@ const getProduct = async (req, res) => {
             for (let i = 0; i < availableSizes.length; i++) {
                 if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes[i])) return res.status(400).send({ status: false, message: "size can contain only S, XS,M, X, L, XXL, XL" });
             }
-            filter.availableSizes = availableSizes.join(',');
+            filter.availableSizes = {$all:availableSizes};
         }
 
         if (req.query.name) {

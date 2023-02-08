@@ -19,7 +19,7 @@ const productSchema = new mongoose.Schema({
     currencyId: {
         type: String,
         enum: "INR"
-      
+
     },
     currencyFormat: {
         type: String,

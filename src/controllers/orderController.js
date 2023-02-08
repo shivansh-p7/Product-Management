@@ -31,6 +31,7 @@ const createOrder = async (req, res) => {
 
         let cart = await cartModel.findOne({ userId: userId, _id: cartId });
         if (!cart) return res.status(404).send({ status: false, message: "cart Does not exist" });
+        if(cart.items.length==0) return res.status(400).send({status:false,message:"add something to cart first"});
 
         let { items, totalPrice, totalItems } = cart;
 
