@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
         }
         if (status || status == "") {
             if (!isValidString(status)) return res.status(400).send({ status: false, message: "please provide status" });
-            if (!["pending", "completed", "cancled"].includes(status)) return res.status(400).send({ status: false, message: "status can hold only pending, completed, cancled" });
+            if (status!="pending") return res.status(400).send({ status: false, message: "status can hold only pending" });
             info.status = status
         }
 
@@ -63,9 +63,14 @@ const updateOrder = async function (req, res) {
     try {
         const userId = req.params.userId
         const data = req.body
-        let { orderId, status } = data
+        let { orderId, status,...a } = data
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: 'Please enter valid request Body' })
+        if (Object.keys(a).length != 0) return res.status(400).send({ status: false, message: "only cartId and cancellable is required" });
+
+        // Authorization
+        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "you are not authrised for this action" });
+        // Authorization
 
         if (!isValidString(orderId)) return res.status(400).send({ status: false, message: 'Please provide orderId' })
         if (!isValidObjectId(orderId)) return res.status(400).send({ status: false, message: 'Please provide valid orderId.' })
@@ -99,6 +104,5 @@ const updateOrder = async function (req, res) {
         res.status(500).send({ status: false, Message: error.message })
     }
 }
-
 
 module.exports = { createOrder, updateOrder }

@@ -27,7 +27,7 @@ router.put('/users/:userId/cart',Authentication, updateCart);
 router.delete("/users/:userId/cart",Authentication, deleteCart);
 
 //......................................ORDER API's...............................
-router.post("/users/:userId/cart",Authentication, createOrder);
-router.put("/users/:userId/cart",Authentication, updateOrder);
+router.post("/users/:userId/order",Authentication, createOrder);
+router.put("/users/:userId/order",Authentication, updateOrder);
 
 module.exports = router;

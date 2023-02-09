@@ -1,4 +1,4 @@
-const { isValidObjectId } = require("../Validations/validation");
+const { isValidObjectId, isValidString } = require("../Validations/validation");
 const userModel = require('../models/userModel');
 const productModel = require('../models/productModel');
 const cartModel = require('../models/cartModel');
@@ -14,9 +14,12 @@ const createCart = async (req, res) => {
        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "you are not authorised for this action" })
        // Authorization
 
-        const { productId, quantity } = req.body;
+        const { productId, quantity,...a } = req.body;
+        if(Object.keys(a).length!=0) return res.status(400).send({status:false,message:`please remove ${Object.keys(a)}`})
+        if(!isValidString(productId)) return res.status(400).send({status:false,message:'productId required'})
         if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "invalid productId" })
 
+        if(!quantity) return res.status(400).send({status:false,message:'quantity required'}) 
         if (!quantity.toString().match(/^[0-9]+$/) || quantity < 1) return res.status(400).send({ status: false, message: 'quantity should be a natural number' })
         // Check if user exists
 
@@ -83,9 +86,9 @@ const getCart = async (req, res) => {
 
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "invalid UserId" })
 
-        Authorization
+        //Authorization
        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "you are not authorised for this action" })
-        Authorization
+        //Authorization
 
         let cart = await cartModel.findOne({ userId: userId }).populate({path:"items",populate:{path:"productId"}})
         if (!cart) return res.status(404).send({ status: false, message: "cart does not exist!" })
@@ -106,12 +109,17 @@ const updateCart = async (req, res) => {
         if (Object.keys(data).length == 0) return res.status().send({ status: false, message: "put some data to update cart" });
         let userId = req.params.userId;
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "invalid userId" })
-        let { productId, cartId, removeProduct } = data
-        if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "invalid userId" })
-        if (!isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "invalid userId" })
+        let { productId, cartId, removeProduct,...a } = data;
+        if(Object.keys(a).length!=0) return res.status(400).send({status:false,message:`please remove ${Object.keys(a)}`})
+
+        if(!isValidString(productId)) return res.status(400).send({status:false,message:'productId requuired'});
+        if(!isValidString(cartId)) return res.status(400).send({status:false,message:'cartId requuired'});
+
+        if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: "invalid productId" });
+        if (!isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "invalid cartId" });
 
        // ___________________________________Authorization___________________________________________
-       if (userId != req.decodedToken.userId) return res.status(400).send({ status: false, message: "Unauthorized" })
+       if (userId != req.decodedToken) return res.status(400).send({ status: false, message: "Unauthorized" })
       //  ___________________________________________________________________________________________
 
 
