@@ -91,7 +91,7 @@ const getProduct = async (req, res) => {
         let filter = { isDeleted: false };
         let priceSorting = {};
 
-        let {name,price,priceGreaterThan,priceLessThan,size,...a} = req.query;
+        let {name,price,priceGreaterThan,priceLessThan,size,priceSort,...a} = req.query;
         if(Object.keys(a).length!=0) return res.status(400).send({status:false,message:"only name price or size can be used for filter"})
 
         if (req.query.size) {
@@ -105,7 +105,7 @@ const getProduct = async (req, res) => {
         if (req.query.name) {
             if (!isValidString(req.query.name)) { return res.status(400).send({ status: false, message: "title is mandatory" }) }
             if (!isValidProductName(req.query.name)) { return res.status(400).send({ status: false, message: "invalid Title" }) }
-            filter.title = {$regex:req.query.name};
+            filter.title = {$regex:req.query.name, $options: 'i' };
         }
 
         if (req.query.priceGreaterThan && req.query.priceLessThan) {
@@ -122,7 +122,7 @@ const getProduct = async (req, res) => {
                 filter.price = { $lt: req.query.priceLessThan }
             }
         }
-        let priceSort = parseInt(req.query.priceSort)
+         priceSort = parseInt(req.query.priceSort)
         if (priceSort) {
            
             if (priceSort != -1 && priceSort != 1) return res.status(400).send({ status: false, message: "priceSort should be only 1 or -1" })
@@ -132,8 +132,9 @@ const getProduct = async (req, res) => {
         const product = await productModel.find(filter).sort(priceSorting).select({ createdAt: 0, updatedAt: 0, deletedAt: 0, __v: 0 });
 
 
-        if (!product) {
-            return res.status(404).json({status: false,message: "No product product found with that query", });
+
+        if (product.length==0) {
+            return res.status(404).json({status: false,message: "No product found with that query", });
         }
         res.status(200).json({ status: true, data: product });
     } catch (err) {

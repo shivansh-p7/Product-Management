@@ -9,7 +9,8 @@ const bcrypt = require('bcrypt');
 const createUser = async (req, res) => {
     try {
         if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: "please provide information" });
-        let { fname, lname, email, phone, password, address } = req.body;
+        let { fname, lname, email, phone, password, address,...a } = req.body;
+        if(Object.keys(a).length!=0) return res.status(400).send({status:false,message:`please remove ${Object.keys(a)}`})
 
         if (!isValidString(fname)) return res.status(400).send({ status: false, message: "fname is mandatory, and should be in string format" })
         if (!isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
@@ -140,7 +141,7 @@ const getUser = async (req, res) => {
 //_________________________________________________________________________________________________________
         
 
-        let userDetails = await userModel.findOne({ _id: userId, isDeleted: false }).select({ __v: 0 })
+        let userDetails = await userModel.findOne({ _id: userId}).select({ __v: 0 })
         if (!userDetails) return res.status(404).send({ status: false, message: "user Not found" })
 
         return res.status(200).send({ status: true, message: "Successfull", data: userDetails })
@@ -161,7 +162,9 @@ const updateUser = async (req, res) => {
 //_________________________________________________________________________________________________________
 
 
-        let { fname, lname, email, phone, password, address } = req.body
+        let { fname, lname, email, phone, password, address,...a } = req.body;
+        if(Object.keys(a).length!=0) return res.status(400).send({status:false,message:`please remove ${Object.keys(a)}`})
+
         let final = {}
         
         if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: "Please enter some DETAILS!!!" })
@@ -210,6 +213,8 @@ const updateUser = async (req, res) => {
            
 
             let  userData = await userModel.findOne({_id:userId})
+            if(!userData) return res.status(404).send({status:false,message:'user not found'});
+            
             let useraddress = userData.address;  //userData instead of req.body
 
             if (address.shipping) {

@@ -30,4 +30,7 @@ router.delete("/users/:userId/cart",Authentication, deleteCart);
 router.post("/users/:userId/order",Authentication, createOrder);
 router.put("/users/:userId/order",Authentication, updateOrder);
 
+
+router.all('/*', (req,res)=> res.status(400).send({status:false,message:"invalid request"}))
+
 module.exports = router;
