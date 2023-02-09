@@ -1,5 +1,6 @@
 const orderModel = require('../models/orderModel');
 const cartModel = require('../models/cartModel');
+const userModel = require('../models/userModel');
 const { isValidString, isValidObjectId } = require('../Validations/validation');
 
 //___________________________________________Order Creation_______________________________________________________________
@@ -13,24 +14,30 @@ const createOrder = async (req, res) => {
         let { cartId, cancellable, status, ...a } = req.body;
         if (Object.keys(a).length != 0) return res.status(400).send({ status: false, message: "only cartId and cancellable is required" });
 
+        if(!cartId) return res.status(400).send({status:false,message:'cartId is required'})
+        cartId = String(cartId)
+        if (!isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "invalid cartId" });
+        
         if (cancellable || cancellable == "") {
             if (typeof (cancellable) != 'boolean') return res.status(400).send({ status: false, message: "please provide true or false in cancellable" })
             info.cancellable = cancellable
         }
         if (status || status == "") {
             if (!isValidString(status)) return res.status(400).send({ status: false, message: "please provide status" });
-            if (!["pending", "completed", "cancled"].includes(status)) return res.status(400).send({ status: false, message: "status can hold only pending, completed, cancled" });
+            if (status!="pending") return res.status(400).send({ status: false, message: "status can hold only pending" });
             info.status = status
         }
-
-        if (!isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "invalid status" });
 
         // Authorization
         if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "you are not authrised for this action" });
         // Authorization
 
+        const userExist = await userModel.findOne({_id:userId})
+        if(!userExist) return res.status(400).send({status:false,message:'user does not exist'})
+
         let cart = await cartModel.findOne({ userId: userId, _id: cartId });
         if (!cart) return res.status(404).send({ status: false, message: "cart Does not exist" });
+        if(cart.items.length==0) return res.status(400).send({status:false,message:"add something to cart first"});
 
         let { items, totalPrice, totalItems } = cart;
 
@@ -61,10 +68,16 @@ const updateOrder = async function (req, res) {
 
     try {
         const userId = req.params.userId
+        if(!isValidObjectId(userId)) return res.status(400).send({status:false,message:'invalid userId'})
         const data = req.body
-        let { orderId, status } = data
+        let { orderId, status,...a } = data
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: 'Please enter valid request Body' })
+        if (Object.keys(a).length != 0) return res.status(400).send({ status: false, message: "only cartId and cancellable is required" });
+
+        // Authorization
+        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "you are not authrised for this action" });
+        // Authorization
 
         if (!isValidString(orderId)) return res.status(400).send({ status: false, message: 'Please provide orderId' })
         if (!isValidObjectId(orderId)) return res.status(400).send({ status: false, message: 'Please provide valid orderId.' })
@@ -75,6 +88,9 @@ const updateOrder = async function (req, res) {
         if (!["completed", "cancelled"].includes(status)) {
             return res.status(400).send({ status: false, message: 'Status should be only completed or cancelled' })
         }
+
+        const userExist = await userModel.findOne({_id:userId})
+        if(!userExist) return res.status(400).send({status:false,message:'user does not exist'})
 
         const cartId = await cartModel.findOne({ userId: userId })
         if (!cartId) return res.status(404).send({ status: false, message: "Cart does not exist" })
@@ -98,6 +114,5 @@ const updateOrder = async function (req, res) {
         res.status(500).send({ status: false, Message: error.message })
     }
 }
-
 
 module.exports = { createOrder, updateOrder }
