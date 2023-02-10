@@ -10,7 +10,7 @@ const Authentication = async (req, res, next) => {
         let token = BearerToken.split(" ")[1];
         jwt.verify(token, "project5-productManagement-group4", (err, decodedToken) => {
             if (err) {
-                return res.status(400).send({ status: false, message: err.message })
+                return res.status(401).send({ status: false, message: err.message })
             }
             if (decodedToken) {
                 req.decodedToken = decodedToken.userId
