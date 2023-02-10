@@ -27,8 +27,8 @@ router.put('/users/:userId/cart',Authentication, updateCart);
 router.delete("/users/:userId/cart",Authentication, deleteCart);
 
 //......................................ORDER API's...............................
-router.post("/users/:userId/order",Authentication, createOrder);
-router.put("/users/:userId/order",Authentication, updateOrder);
+router.post("/users/:userId/orders",Authentication, createOrder);
+router.put("/users/:userId/orders",Authentication, updateOrder);
 
 
 router.all('/*', (req,res)=> res.status(400).send({status:false,message:"invalid request"}))
