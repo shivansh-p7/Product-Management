@@ -214,7 +214,7 @@ const updateProduct = async (req, res) => {
 
     if (isFreeShipping) {
         isFreeShipping = isFreeShipping.trim().toLowerCase()
-        if (typeof (isFreeShipping) !== 'boolean') return res.status(400).send({ status: false, message: "FreeShipping must have value of either True or False" });
+        if (isFreeShipping !== 'true' && isFreeShipping !== 'false') return res.status(400).send({ status: false, message: "FreeShipping must have value of either True or False" });
         final.isFreeShipping = isFreeShipping
     }
 
