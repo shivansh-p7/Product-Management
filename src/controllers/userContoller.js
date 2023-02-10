@@ -137,7 +137,7 @@ const getUser = async (req, res) => {
         let userId = req.params.userId;
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "invalid userId" })
 //________________________________Authorization_____________________________________________________
-        if (userId != req.decodedToken) return res.status(400).send({ status: false, message: "unauthorized" })
+        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "unauthorized" })
 //_________________________________________________________________________________________________________
         
 
@@ -158,7 +158,7 @@ const updateUser = async (req, res) => {
         if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Please Enter the valid UserId" })
 //________________________________Authorization_____________________________________________________
 
-        if (userId != req.decodedToken) return res.status(400).send({ status: false, message: "unauthorized" })
+        if (userId != req.decodedToken) return res.status(403).send({ status: false, message: "unauthorized" })
 //_________________________________________________________________________________________________________
 
 
